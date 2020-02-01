@@ -2,13 +2,19 @@
   "name": "azure-devops-poller",
   "version": "1.0.0",
   "description": "package to pull data from azure devops",
-  "main": "main.js",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Dan Miller",
   "license": "ISC",
   "dependencies": {
-    "azure-devops-node-api": "^10.0.0"
+    "@types/node-fetch": "^2.5.4",
+    "azure-devops-node-api": "^10.0.0",
+    "node-fetch": "^2.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^13.7.0",
+    "typescript": "^3.7.5"
   }
 }
