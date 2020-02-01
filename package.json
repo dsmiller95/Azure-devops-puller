@@ -5,19 +5,19 @@
   "main": "build/index.js",
   "scripts": {
     "build": "npx tsc && npm run zip",
-    "zip": "cd build && bestzip ../build.zip * && cd ..",
+    "zip": "bestzip build.zip build/ node_modules/ package.json",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Dan Miller",
   "license": "ISC",
   "dependencies": {
-    "@types/node-fetch": "^2.5.4",
     "azure-devops-node-api": "^10.0.0",
-    "bestzip": "^2.1.5",
     "node-fetch": "^2.6.0"
   },
   "devDependencies": {
+    "@types/node-fetch": "^2.5.4",
     "@types/node": "^13.7.0",
-    "typescript": "^3.7.5"
+    "typescript": "^3.7.5",
+    "bestzip": "^2.1.5"
   }
 }
