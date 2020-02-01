@@ -4,7 +4,8 @@
   "description": "package to pull data from azure devops",
   "main": "build/index.js",
   "scripts": {
-    "build": "npx tsc",
+    "build": "npx tsc && npm run zip",
+    "zip": "cd build && bestzip ../build.zip * && cd ..",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Dan Miller",
@@ -12,6 +13,7 @@
   "dependencies": {
     "@types/node-fetch": "^2.5.4",
     "azure-devops-node-api": "^10.0.0",
+    "bestzip": "^2.1.5",
     "node-fetch": "^2.6.0"
   },
   "devDependencies": {
