@@ -23,10 +23,8 @@ const repositoryID = '654d2cf2-fe1f-4f47-9eee-4a92f00c2174';
 const orgUrl = "https://dev.azure.com/symplr";
 const projectName = "Provider Management";
 
-// if there was a PR created in the last 10 minutes, it is new
-const maxAgeOfNewPr: number = 10 * 60 * 1000;
-
 exports.handler = async (event: any): Promise<ReturnType> => {
+    const maxAgeOfNewPr: number = parseInt(process.env.NEW_PR_MINUTE_THRESHOLD ?? '10') * 60 * 1000;
 
     let token = process.env.AZURE_PERSONAL_ACCESS_TOKEN;
     if(!token){
@@ -65,7 +63,5 @@ async function transmitResultToIot(result: boolean): Promise<any>{
         qos: 1
     };
 
-    iotData.publish(params);
-
-    return null;// published.$response.data;
+    return await iotData.publish(params).promise();
 }
