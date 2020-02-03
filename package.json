@@ -11,13 +11,15 @@
   "author": "Dan Miller",
   "license": "ISC",
   "dependencies": {
+    "aws-sdk": "^2.610.0",
     "azure-devops-node-api": "^10.0.0",
     "node-fetch": "^2.6.0"
   },
   "devDependencies": {
-    "@types/node-fetch": "^2.5.4",
+    "@types/aws-sdk": "^2.7.0",
     "@types/node": "^13.7.0",
-    "typescript": "^3.7.5",
-    "bestzip": "^2.1.5"
+    "@types/node-fetch": "^2.5.4",
+    "bestzip": "^2.1.5",
+    "typescript": "^3.7.5"
   }
 }
