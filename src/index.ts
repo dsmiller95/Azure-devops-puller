@@ -19,12 +19,33 @@ interface PullRequestSummary {
     title: string;
 }
 
+interface PulseDefinition {
+    pattern: string;
+    interval: number;
+}
+
+interface PulseMap {
+    newPr: PulseDefinition;
+}
+
 const repositoryID = '654d2cf2-fe1f-4f47-9eee-4a92f00c2174';
 const orgUrl = "https://dev.azure.com/symplr";
 const projectName = "Provider Management";
 
 async function handler(event: any): Promise<ReturnType> {
     const maxAgeOfNewPr: number = parseInt(process.env.NEW_PR_MINUTE_THRESHOLD ?? '10') * 60 * 1000;
+
+    let pulseMapping: PulseMap;
+    if(process.env.PULSE_RULE_MAP){
+        pulseMapping = JSON.parse(process.env.PULSE_RULE_MAP);
+    } else {
+        pulseMapping = {
+            newPr: {
+                pattern: 'XXXX----XX--X',
+                interval: 200
+            }
+        }
+    }
 
     let token = process.env.AZURE_PERSONAL_ACCESS_TOKEN;
     if(!token){
@@ -45,27 +66,40 @@ async function handler(event: any): Promise<ReturnType> {
         .sort((prA, prB) => prA.age - prB.age);
 
     const hasNewPr = prsByAgeAscending[0].age < maxAgeOfNewPr;
-    await transmitResultToIot(hasNewPr);
+    const iotData = new IotData({apiVersion: '2015-05-28', endpoint: process.env.IOT_ENDPOINT ?? ''});
+
+
+    if(hasNewPr){
+        await transmitPulseToIot(pulseMapping.newPr, iotData);
+    }
+    ///await transmitResultToIot(hasNewPr, iotData);
 
     return {
         success: true,
-        hasNewPr,
-        prs: prsByAgeAscending
+        hasNewPr
     };
 };
 
-async function transmitResultToIot(result: boolean): Promise<any>{
-    let endpoint: string = process.env.IOT_ENDPOINT ?? '';
-    const iotData = new IotData({apiVersion: '2015-05-28', endpoint});
+async function transmitPulseToIot(pulseDef: PulseDefinition, dataAPI: IotData) {
+    let params: IotData.PublishRequest = {
+        topic: 'ACswitch/interval', /* required */
+        payload: JSON.stringify({pattern: pulseDef.pattern, interval: pulseDef.interval.toFixed(0)})  /* Strings will be Base-64 encoded on your behalf */,
+        qos: 1
+    };
+
+    return await dataAPI.publish(params).promise();
+}
+
+async function transmitResultToIot(result: boolean, dataAPI: IotData): Promise<any>{
     let params: IotData.PublishRequest = {
         topic: 'ACswitch/switch', /* required */
         payload: result ? 'true' : 'false'  /* Strings will be Base-64 encoded on your behalf */,
         qos: 1
     };
 
-    return await iotData.publish(params).promise();
+    return await dataAPI.publish(params).promise();
 }
 
 export {
     handler
-}
+};
