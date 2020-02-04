@@ -23,7 +23,7 @@ const repositoryID = '654d2cf2-fe1f-4f47-9eee-4a92f00c2174';
 const orgUrl = "https://dev.azure.com/symplr";
 const projectName = "Provider Management";
 
-exports.handler = async (event: any): Promise<ReturnType> => {
+async function handler(event: any): Promise<ReturnType> {
     const maxAgeOfNewPr: number = parseInt(process.env.NEW_PR_MINUTE_THRESHOLD ?? '10') * 60 * 1000;
 
     let token = process.env.AZURE_PERSONAL_ACCESS_TOKEN;
@@ -64,4 +64,8 @@ async function transmitResultToIot(result: boolean): Promise<any>{
     };
 
     return await iotData.publish(params).promise();
+}
+
+export {
+    handler
 }
