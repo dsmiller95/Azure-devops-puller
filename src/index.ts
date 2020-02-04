@@ -19,14 +19,33 @@ interface PullRequestSummary {
     title: string;
 }
 
+interface PulseDefinition {
+    pattern: string;
+    interval: number;
+}
+
+interface PulseMap {
+    newPr: PulseDefinition;
+}
+
 const repositoryID = '654d2cf2-fe1f-4f47-9eee-4a92f00c2174';
 const orgUrl = "https://dev.azure.com/symplr";
 const projectName = "Provider Management";
 
-// if there was a PR created in the last 10 minutes, it is new
-const maxAgeOfNewPr: number = 10 * 60 * 1000;
-
 exports.handler = async (event: any): Promise<ReturnType> => {
+    const maxAgeOfNewPr: number = parseInt(process.env.NEW_PR_MINUTE_THRESHOLD ?? '10') * 60 * 1000;
+
+    let pulseMapping: PulseMap;
+    if(process.env.PULSE_RULE_MAP){
+        pulseMapping = JSON.parse(process.env.PULSE_RULE_MAP);
+    } else {
+        pulseMapping = {
+            newPr: {
+                pattern: 'XXXX----XX--X',
+                interval: 200
+            }
+        }
+    }
 
     let token = process.env.AZURE_PERSONAL_ACCESS_TOKEN;
     if(!token){
@@ -51,7 +70,7 @@ exports.handler = async (event: any): Promise<ReturnType> => {
 
 
     if(hasNewPr){
-        await transmitPulseToIot()
+        await transmitPulseToIot(pulseMapping.newPr, iotData);
     }
     ///await transmitResultToIot(hasNewPr, iotData);
 
@@ -62,10 +81,10 @@ exports.handler = async (event: any): Promise<ReturnType> => {
     };
 };
 
-async function transmitPulseToIot(pulsePattern: string, pulseIntervalMilliseconds: number, dataAPI: IotData) {
+async function transmitPulseToIot(pulseDef: PulseDefinition, dataAPI: IotData) {
     let params: IotData.PublishRequest = {
         topic: 'ACswitch/interval', /* required */
-        payload: JSON.stringify({pattern: pulsePattern, interval: pulseIntervalMilliseconds.toFixed(0)})  /* Strings will be Base-64 encoded on your behalf */,
+        payload: JSON.stringify({pattern: pulseDef.pattern, interval: pulseDef.interval.toFixed(0)})  /* Strings will be Base-64 encoded on your behalf */,
         qos: 1
     };
 
