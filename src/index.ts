@@ -76,8 +76,7 @@ exports.handler = async (event: any): Promise<ReturnType> => {
 
     return {
         success: true,
-        hasNewPr,
-        prs: prsByAgeAscending
+        hasNewPr
     };
 };
 
