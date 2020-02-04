@@ -47,7 +47,13 @@ exports.handler = async (event: any): Promise<ReturnType> => {
         .sort((prA, prB) => prA.age - prB.age);
 
     const hasNewPr = prsByAgeAscending[0].age < maxAgeOfNewPr;
-    await transmitResultToIot(hasNewPr);
+    const iotData = new IotData({apiVersion: '2015-05-28', endpoint: process.env.IOT_ENDPOINT ?? ''});
+
+
+    if(hasNewPr){
+        await transmitPulseToIot()
+    }
+    ///await transmitResultToIot(hasNewPr, iotData);
 
     return {
         success: true,
@@ -56,16 +62,22 @@ exports.handler = async (event: any): Promise<ReturnType> => {
     };
 };
 
-async function transmitResultToIot(result: boolean): Promise<any>{
-    let endpoint: string = process.env.IOT_ENDPOINT ?? '';
-    const iotData = new IotData({apiVersion: '2015-05-28', endpoint});
+async function transmitPulseToIot(pulsePattern: string, pulseIntervalMilliseconds: number, dataAPI: IotData) {
+    let params: IotData.PublishRequest = {
+        topic: 'ACswitch/interval', /* required */
+        payload: JSON.stringify({pattern: pulsePattern, interval: pulseIntervalMilliseconds.toFixed(0)})  /* Strings will be Base-64 encoded on your behalf */,
+        qos: 1
+    };
+
+    return await dataAPI.publish(params).promise();
+}
+
+async function transmitResultToIot(result: boolean, dataAPI: IotData): Promise<any>{
     let params: IotData.PublishRequest = {
         topic: 'ACswitch/switch', /* required */
         payload: result ? 'true' : 'false'  /* Strings will be Base-64 encoded on your behalf */,
         qos: 1
     };
 
-    iotData.publish(params);
-
-    return null;// published.$response.data;
+    return await dataAPI.publish(params).promise();
 }
