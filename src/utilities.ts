@@ -118,5 +118,6 @@ function getPRLink(prObj: any){
 function formatLink(url: string, string: string){
     return string + ': ' + url;
 }
-​
+
+
 getFormattedStaleThreadsData()

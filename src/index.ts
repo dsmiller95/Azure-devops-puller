@@ -129,15 +129,9 @@ async function getAzureApiConnection(token: string): Promise<WebApi> {
 async function getPrData(
     connection: WebApi,
     newPrThreshold: number,
-    additionalRequestOptions?: Partial<GitPullRequestSearchCriteria>) : Promise<{prs: PullRequestSummary[], newPr: PullRequestSummary | null}> {
-    const gitApi = await connection.getGitApi();
-    let searchCriteria = additionalRequestOptions ?? {};
-    const prs: GitPullRequest[] = await gitApi.getPullRequests(repositoryID, {
-        ...searchCriteria,
-        repositoryId: repositoryID,
-    },
-    projectName,
-    0);
+    additionalRequestOptions?: Partial<GitPullRequestSearchCriteria>) : Promise<{prs: PullRequestSummary[], newPr: PullRequestSummary | null}>
+{
+    const prs: GitPullRequest[] = await getPrRawData(connection, additionalRequestOptions);
 
     const currentTime = (new Date()).valueOf();
     const prsByAgeAscending: PullRequestSummary[] = prs
@@ -150,6 +144,23 @@ async function getPrData(
         prs: prsByAgeAscending,
         newPr: hasNewPr ? prsByAgeAscending[0] : null
     }
+}
+
+
+async function getPrRawData(
+    connection: WebApi,
+    additionalRequestOptions?: Partial<GitPullRequestSearchCriteria>) : Promise<GitPullRequest[]>
+{
+    const gitApi = await connection.getGitApi();
+    let searchCriteria = additionalRequestOptions ?? {};
+    const prs: GitPullRequest[] = await gitApi.getPullRequests(repositoryID, {
+        ...searchCriteria,
+        repositoryId: repositoryID,
+    },
+    projectName,
+    0);
+
+    return prs;
 }
 
 
@@ -176,6 +187,7 @@ async function transmitResultToIot(result: boolean, dataAPI: IotData): Promise<a
 export {
     handler,
     getPrData,
+    getPrRawData,
     getAzureApiConnection,
     getPulsePattern
 };

@@ -11,8 +11,10 @@
   "author": "Dan Miller",
   "license": "ISC",
   "dependencies": {
+    "@types/moment": "^2.13.0",
     "aws-sdk": "^2.610.0",
     "azure-devops-node-api": "^10.0.0",
+    "moment": "^2.27.0",
     "node-fetch": "^2.6.0"
   },
   "devDependencies": {
